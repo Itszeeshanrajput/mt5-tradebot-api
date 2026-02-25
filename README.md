@@ -551,8 +551,8 @@ pip install --upgrade MetaTrader5
 ### Getting Help
 
 - 📖 Check the [API Documentation](http://localhost:8001/docs)
-- 💬 Open an [Issue](https://github.com/yourusername/mt5-tradebot-api/issues)
-- 📧 Contact: your.email@example.com
+- 💬 Open an [Issue](https://github.com/Itszeeshanrajput/mt5-tradebot-api/issues)
+- 📧 Contact: Itszeeshanrajput@gmail.com
 
 ---
 
@@ -582,7 +582,7 @@ Contributions are welcome! Here's how you can help:
 
 ```bash
 # Clone your fork
-git clone https://github.com/yourusername/mt5-tradebot-api.git
+git clone https://github.com/Itszeeshanrajput/mt5-tradebot-api.git
 
 # Install development dependencies
 pip install -r requirements.txt
