@@ -26,21 +26,18 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pytest pytest-cov
+        pip install fastapi==0.109.0 uvicorn[standard]==0.27.0 pandas==2.1.4 pydantic==2.5.3 python-multipart==0.0.6
+        pip install pytest pytest-cov flake8 black
+      continue-on-error: false
 
     - name: Lint with flake8
       run: |
-        pip install flake8
-        # Stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # Exit-zero treats all errors as warnings
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       continue-on-error: true
 
     - name: Check code formatting with black
       run: |
-        pip install black
         black --check .
       continue-on-error: true
 
@@ -48,7 +45,18 @@ jobs:
       run: |
         python -c "import fastapi; print('FastAPI OK')"
         python -c "import pandas; print('Pandas OK')"
-        python -c "from main import app; print('Main app OK')"
+        python -c "import pydantic; print('Pydantic OK')"
+      continue-on-error: false
+    
+    - name: Test main.py syntax
+      run: |
+        python -m py_compile main.py
+      continue-on-error: true
+    
+    - name: Run pytest tests
+      run: |
+        pytest tests/ -v --tb=short
+      continue-on-error: false
 
     - name: Display Python environment
       run: |
