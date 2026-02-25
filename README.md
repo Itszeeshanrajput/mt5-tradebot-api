@@ -610,10 +610,8 @@ If you find this project useful, please consider giving it a star! ⭐
 
 ## 📞 Contact & Support
 
-- **GitHub:** [@yourusername](https://github.com/yourusername)
-- **Email:** your.email@example.com
-- **Discord:** [Join our community](https://discord.gg/yourserver)
-- **Twitter:** [@yourhandle](https://twitter.com/yourhandle)
+- **GitHub:** [@Itszeeshanrajput](https://github.com/yourusername)
+- **Email:** itszeeshanrajput@gmail.com
 
 ---
 
