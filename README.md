@@ -62,7 +62,7 @@
 
 **Step 1: Clone the repository**
 ```bash
-git clone https://github.com/yourusername/mt5-tradebot-api.git
+git clone https://github.com/Itszeeshanrajput/mt5-tradebot-api.git
 cd mt5-tradebot-api
 ```
 
