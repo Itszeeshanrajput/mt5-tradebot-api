@@ -26,18 +26,24 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install fastapi==0.109.0
-        pip install uvicorn[standard]==0.27.0
-        pip install pandas==2.1.4
-        pip install pydantic==2.5.3
-        pip install python-multipart==0.0.6
-        pip install pytest pytest-cov flake8 black
+        pip install --no-cache-dir fastapi==0.109.0
+        pip install --no-cache-dir "uvicorn[standard]==0.27.0"
+        pip install --no-cache-dir pandas==2.1.4
+        pip install --no-cache-dir pydantic==2.5.3
+        pip install --no-cache-dir python-multipart==0.0.6
+        pip install --no-cache-dir pytest pytest-cov flake8 black
       continue-on-error: false
     
     - name: Verify installations
       run: |
-        pip list
-        python -c "import sys; print(f'Python: {sys.version}')"
+        echo "=== Installed packages ==="
+        pip list | findstr /i "fastapi pandas pydantic uvicorn pytest"
+        echo "=== Python version ==="
+        python --version
+        echo "=== Testing imports ==="
+        python -c "import fastapi; print('FastAPI:', fastapi.__version__)"
+        python -c "import pandas; print('Pandas:', pandas.__version__)"
+        python -c "import pydantic; print('Pydantic:', pydantic.__version__)"
       continue-on-error: false
 
     - name: Lint with flake8
@@ -51,13 +57,6 @@ jobs:
         black --check .
       continue-on-error: true
 
-    - name: Test API imports
-      run: |
-        python -c "import fastapi; print('FastAPI OK')"
-        python -c "import pandas; print('Pandas OK')"
-        python -c "import pydantic; print('Pydantic OK')"
-      continue-on-error: false
-    
     - name: Test main.py syntax
       run: |
         python -m py_compile main.py
