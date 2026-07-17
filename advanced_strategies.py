@@ -126,8 +126,8 @@ class AdvancedStrategies:
         df_h1 = df_h1.merge(df_h4[['time', 'Trend_H4']], on='time', how='left')
         df_h1 = df_h1.merge(df_d1[['time', 'Trend_D1']], on='time', how='left')
         
-        df_h1['Trend_H4'].fillna(method='ffill', inplace=True)
-        df_h1['Trend_D1'].fillna(method='ffill', inplace=True)
+        df_h1['Trend_H4'] = df_h1['Trend_H4'].ffill()
+        df_h1['Trend_D1'] = df_h1['Trend_D1'].ffill()
         
         df_h1['Signal'] = 0
         df_h1.loc[(df_h1['Trend_H1'] == 1) & (df_h1['Trend_H4'] == 1) & (df_h1['Trend_D1'] == 1), 'Signal'] = 1

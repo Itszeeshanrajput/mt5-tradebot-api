@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MT5 TradeBot Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #080b11;
+            --panel-bg: rgba(20, 26, 40, 0.6);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-purple: #8b5cf6;
+            --accent-orange: #f59e0b;
+            --glow-color: rgba(59, 130, 246, 0.35);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 10% 20%, rgba(139, 92, 246, 0.1) 0px, transparent 50%),
+                radial-gradient(at 90% 80%, rgba(59, 130, 246, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(8, 11, 17, 0.8);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo i {
+            -webkit-text-fill-color: var(--accent-blue);
+            font-size: 1.75rem;
+            filter: drop-shadow(0 0 8px var(--glow-color));
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid var(--border-color);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--accent-red);
+            box-shadow: 0 0 10px var(--accent-red);
+        }
+
+        .status-dot.connected {
+            background-color: var(--accent-green);
+            box-shadow: 0 0 10px var(--accent-green);
+        }
+
+        .container {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            padding: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--panel-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 1.25rem;
+            padding: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.75rem;
+        }
+
+        .card-title i {
+            color: var(--accent-blue);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            outline: none;
+            width: 100%;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--accent-blue) 0%, #2563eb 100%);
+            color: #fff;
+            border: none;
+            border-radius: 0.75rem;
+            padding: 0.85rem 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border-color);
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: none;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--accent-red) 0%, #dc2626 100%);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.35);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--accent-green) 0%, #059669 100%);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.35);
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .metric-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .metric-title {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .metric-value.profit {
+            color: var(--accent-green);
+        }
+        .metric-value.loss {
+            color: var(--accent-red);
+        }
+
+        /* Table Styling */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 0.75rem;
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-secondary);
+            font-weight: 600;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-buy {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent-green);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .badge-sell {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--accent-red);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        /* Live log panel */
+        .log-panel {
+            background: #05070a;
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            max-height: 200px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .log-entry {
+            color: #38bdf8;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-radius: 0.5rem;
+        }
+
+        .tab-btn.active {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.01);
+            border-radius: 0.75rem;
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <i class="fa-solid fa-chart-line-up"></i>
+            <span>MT5 TradeBot API</span>
+        </div>
+        <div class="connection-status">
+            <div id="statusDot" class="status-dot"></div>
+            <span id="statusText">Disconnected</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- LEFT COLUMN: CONNECTIONS & METRICS -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <!-- MT5 Connection -->
+            <div class="card">
+                <div class="card-title">
+                    <i class="fa-solid fa-plug"></i> MT5 Terminal Connection
+                </div>
+                <div id="connectForm">
+                    <div class="form-row" style="margin-bottom: 1rem;">
+                        <div class="form-group">
+                            <label for="login">MT5 Login ID</label>
+                            <input type="number" id="login" placeholder="e.g. 262323581">
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" id="password" placeholder="Password">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label for="server">Broker Server</label>
+                        <input type="text" id="server" placeholder="e.g. Exness-MT5Trial16">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label for="path">Terminal Path (Optional)</label>
+                        <input type="text" id="path" placeholder="C:\Program Files\MetaTrader 5\terminal64.exe">
+                    </div>
+                    <button class="btn" id="btnConnect" onclick="connectMT5()">
+                        <i class="fa-solid fa-link"></i> Connect
+                    </button>
+                </div>
+                <div id="disconnectForm" style="display: none;">
+                    <div class="grid-3" style="margin-bottom: 1rem;">
+                        <div class="metric-box">
+                            <div class="metric-title">Login Account</div>
+                            <div class="metric-value" id="dispLogin">-</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-title">Broker Server</div>
+                            <div class="metric-value" id="dispServer" style="font-size: 0.9rem;">-</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-title">Leverage</div>
+                            <div class="metric-value" id="dispLeverage">-</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-danger" onclick="disconnectMT5()">
+                        <i class="fa-solid fa-link-slash"></i> Disconnect
+                    </button>
+                </div>
+            </div>
+
+            <!-- Account Summary -->
+            <div class="card">
+                <div class="card-title">
+                    <i class="fa-solid fa-wallet"></i> Account Metrics
+                </div>
+                <div class="grid-3">
+                    <div class="metric-box">
+                        <div class="metric-title">Balance</div>
+                        <div class="metric-value" id="accBalance">$0.00</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-title">Equity</div>
+                        <div class="metric-value" id="accEquity">$0.00</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-title">Free Margin</div>
+                        <div class="metric-value" id="accFreeMargin">$0.00</div>
+                    </div>
+                </div>
+                <div class="grid-3">
+                    <div class="metric-box">
+                        <div class="metric-title">Current Profit</div>
+                        <div class="metric-value" id="accProfit">$0.00</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-title">Used Margin</div>
+                        <div class="metric-value" id="accMargin">$0.00</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-title">Margin Level</div>
+                        <div class="metric-value" id="accMarginLevel">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Positions -->
+            <div class="card" style="flex: 1;">
+                <div class="card-title">
+                    <i class="fa-solid fa-arrows-left-right"></i> Open Positions
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Ticket</th>
+                                <th>Symbol</th>
+                                <th>Type</th>
+                                <th>Volume</th>
+                                <th>Profit</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="positionsTable">
+                            <tr>
+                                <td colspan="6" style="text-align: center; color: var(--text-secondary);">No open positions found or MT5 disconnected</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: AUTO-TRADE & BACKTESTING -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <!-- Navigation Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('backtest')">
+                    <i class="fa-solid fa-vial"></i> Backtesting & Optimization
+                </button>
+                <button class="tab-btn" onclick="switchTab('autotrade')">
+                    <i class="fa-solid fa-robot"></i> Live Auto-Trader
+                </button>
+            </div>
+
+            <!-- Tab Content: Backtester -->
+            <div id="tabBacktest" class="tab-content active card">
+                <div class="card-title">
+                    <i class="fa-solid fa-gauge-high"></i> Strategy Simulation
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="btSymbol">Symbol</label>
+                        <input type="text" id="btSymbol" value="EURUSD">
+                    </div>
+                    <div class="form-group">
+                        <label for="btTimeframe">Timeframe</label>
+                        <select id="btTimeframe">
+                            <option value="M1">M1 (1 Minute)</option>
+                            <option value="M5">M5 (5 Minutes)</option>
+                            <option value="M15">M15 (15 Minutes)</option>
+                            <option value="M30">M30 (30 Minutes)</option>
+                            <option value="H1" selected>H1 (1 Hour)</option>
+                            <option value="H4">H4 (4 Hours)</option>
+                            <option value="D1">D1 (1 Day)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="btStartDate">Start Date</label>
+                        <input type="datetime-local" id="btStartDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="btEndDate">End Date</label>
+                        <input type="datetime-local" id="btEndDate">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="btStrategy">Strategy Type</label>
+                        <select id="btStrategy" onchange="updateStrategyParamsUI()">
+                            <option value="simple_ma_crossover">Simple MA Crossover</option>
+                            <option value="rsi" selected>Relative Strength Index (RSI)</option>
+                            <option value="bollinger_bands">Bollinger Bands</option>
+                            <option value="macd">MACD Divergence</option>
+                            <option value="stochastic">Stochastic Oscillator</option>
+                            <option value="ichimoku">Ichimoku Kinko Hyo</option>
+                            <option value="vwap">Volume Weighted (VWAP)</option>
+                            <option value="breakout">Volume Breakout</option>
+                            <option value="mean_reversion">Z-Score Mean Reversion</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="btLotSize">Lot Size</label>
+                        <input type="number" id="btLotSize" value="0.1" step="0.01">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="btSL">Stop Loss (Pips, 0 for None)</label>
+                        <input type="number" id="btSL" value="50">
+                    </div>
+                    <div class="form-group">
+                        <label for="btTP">Take Profit (Pips, 0 for None)</label>
+                        <input type="number" id="btTP" value="100">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="btParams">Strategy Parameters (JSON)</label>
+                    <textarea id="btParams" rows="2">{"rsi_period": 14, "oversold": 30, "overbought": 70}</textarea>
+                </div>
+
+                <div class="form-row">
+                    <button class="btn btn-secondary" onclick="runOptimize()">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Optimize
+                    </button>
+                    <button class="btn" onclick="runBacktest()">
+                        <i class="fa-solid fa-play"></i> Run Simulation
+                    </button>
+                </div>
+
+                <div id="backtestResults" style="display: none; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+                    <h3 style="margin-bottom: 1rem;">Simulation Results</h3>
+                    <div class="grid-3" style="margin-bottom: 1rem;">
+                        <div class="metric-box">
+                            <div class="metric-title">Win Rate</div>
+                            <div class="metric-value" id="resWinRate">-</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-title">Net Profit</div>
+                            <div class="metric-value" id="resProfit">-</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-title">Max Drawdown</div>
+                            <div class="metric-value" id="resDrawdown" style="color: var(--accent-red);">-</div>
+                        </div>
+                    </div>
+                    <div class="grid-3" style="margin-bottom: 1.5rem;">
+                        <div class="metric-box">
+                            <div class="metric-title">Total Trades</div>
+                            <div class="metric-value" id="resTotalTrades">-</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-title">Profit Factor</div>
+                            <div class="metric-value" id="resProfitFactor">-</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-title">Final Balance</div>
+                            <div class="metric-value" id="resFinalBalance">-</div>
+                        </div>
+                    </div>
+
+                    <div class="chart-wrapper">
+                        <canvas id="equityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content: Live Auto Trader -->
+            <div id="tabAutotrade" class="tab-content card">
+                <div class="card-title">
+                    <i class="fa-solid fa-robot"></i> Automated Trading Engine
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="atSymbol">Trading Symbol</label>
+                        <input type="text" id="atSymbol" value="EURUSD">
+                    </div>
+                    <div class="form-group">
+                        <label for="atTimeframe">Indicator Timeframe</label>
+                        <select id="atTimeframe">
+                            <option value="M1" selected>M1 (1 Minute)</option>
+                            <option value="M5">M5 (5 Minutes)</option>
+                            <option value="M15">M15 (15 Minutes)</option>
+                            <option value="M30">M30 (30 Minutes)</option>
+                            <option value="H1">H1 (1 Hour)</option>
+                            <option value="H4">H4 (4 Hours)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="atStrategy">Execution Strategy</label>
+                        <select id="atStrategy" onchange="updateAutoTradeParamsUI()">
+                            <option value="simple_ma_crossover">Simple MA Crossover</option>
+                            <option value="rsi" selected>Relative Strength Index (RSI)</option>
+                            <option value="bollinger_bands">Bollinger Bands</option>
+                            <option value="macd">MACD Divergence</option>
+                            <option value="stochastic">Stochastic Oscillator</option>
+                            <option value="ichimoku">Ichimoku Kinko Hyo</option>
+                            <option value="vwap">Volume Weighted (VWAP)</option>
+                            <option value="breakout">Volume Breakout</option>
+                            <option value="mean_reversion">Z-Score Mean Reversion</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="atLotSize">Lot Size</label>
+                        <input type="number" id="atLotSize" value="0.01" step="0.01">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="atSL">Stop Loss (Pips, 0 for None)</label>
+                        <input type="number" id="atSL" value="20">
+                    </div>
+                    <div class="form-group">
+                        <label for="atTP">Take Profit (Pips, 0 for None)</label>
+                        <input type="number" id="atTP" value="40">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="atParams">Strategy Params (JSON)</label>
+                    <textarea id="atParams" rows="2">{"rsi_period": 14, "oversold": 30, "overbought": 70}</textarea>
+                </div>
+
+                <button class="btn btn-success" id="btnToggleAutoTrade" onclick="toggleAutoTrade()">
+                    <i class="fa-solid fa-play"></i> Start Automated Trading
+                </button>
+
+                <div style="border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.75rem;">
+                        <h4 style="font-weight:600;">Engine Execution Logs</h4>
+                        <span id="autoTradeStatusBadge" class="badge" style="background: rgba(239, 68, 68, 0.15); color: var(--accent-red);">Inactive</span>
+                    </div>
+                    <div class="log-panel" id="autoTradeLogs">
+                        <div style="color: var(--text-secondary);">Logs will stream here when auto-trading starts...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = ""; // Current host relative API
+        let equityChart = null;
+
+        // Set default dates (start date 30 days ago, end date now)
+        window.addEventListener('load', () => {
+            const now = new Date();
+            const past = new Date();
+            past.setDate(now.getDate() - 30);
+            
+            // Format to ISO string matching datetime-local input fields (YYYY-MM-DDTHH:MM)
+            document.getElementById('btEndDate').value = now.toISOString().slice(0, 16);
+            document.getElementById('btStartDate').value = past.toISOString().slice(0, 16);
+            
+            // Start state sync loops
+            checkHealth();
+            setInterval(checkHealth, 5000);
+            setInterval(syncAccountAndPositions, 5000);
+        });
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            if (tab === 'backtest') {
+                event.currentTarget.classList.add('active');
+                document.getElementById('tabBacktest').classList.add('active');
+            } else {
+                event.currentTarget.classList.add('active');
+                document.getElementById('tabAutotrade').classList.add('active');
+            }
+        }
+
+        const strategyParamsPreset = {
+            simple_ma_crossover: '{"fast_period": 10, "slow_period": 20}',
+            rsi: '{"rsi_period": 14, "oversold": 30, "overbought": 70}',
+            bollinger_bands: '{"period": 20, "std_dev": 2.0}',
+            macd: '{"fast": 12, "slow": 26, "signal": 9}',
+            stochastic: '{"k_period": 14, "d_period": 3, "oversold": 20, "overbought": 80}',
+            ichimoku: '{"tenkan": 9, "kijun": 26, "senkou_b": 52}',
+            vwap: '{"period": 20}',
+            breakout: '{"lookback": 20, "volume_threshold": 1.5}',
+            mean_reversion: '{"period": 20, "std_threshold": 2.0}'
+        };
+
+        function updateStrategyParamsUI() {
+            const strat = document.getElementById('btStrategy').value;
+            document.getElementById('btParams').value = strategyParamsPreset[strat] || '{}';
+        }
+
+        function updateAutoTradeParamsUI() {
+            const strat = document.getElementById('atStrategy').value;
+            document.getElementById('atParams').value = strategyParamsPreset[strat] || '{}';
+        }
+
+        let isConnected = false;
+        let isAutoTrading = false;
+
+        async function checkHealth() {
+            try {
+                const res = await fetch('/api/v1/health');
+                const data = await res.json();
+                
+                isConnected = data.mt5_connected;
+                const dot = document.getElementById('statusDot');
+                const text = document.getElementById('statusText');
+                
+                if (isConnected) {
+                    dot.classList.add('connected');
+                    text.innerText = "Connected to MT5";
+                    
+                    document.getElementById('connectForm').style.display = 'none';
+                    document.getElementById('disconnectForm').style.display = 'block';
+                } else {
+                    dot.classList.remove('connected');
+                    text.innerText = "Disconnected";
+                    
+                    document.getElementById('connectForm').style.display = 'block';
+                    document.getElementById('disconnectForm').style.display = 'none';
+                }
+
+                // Sync autotrade state too
+                const atRes = await fetch('/api/v1/autotrade/status');
+                const atData = await atRes.json();
+                isAutoTrading = atData.active;
+                
+                const atBadge = document.getElementById('autoTradeStatusBadge');
+                const atBtn = document.getElementById('btnToggleAutoTrade');
+                
+                if (isAutoTrading) {
+                    atBadge.innerText = "Running";
+                    atBadge.style.background = 'rgba(16, 185, 129, 0.15)';
+                    atBadge.style.color = 'var(--accent-green)';
+                    atBadge.style.border = '1px solid rgba(16, 185, 129, 0.3)';
+                    atBtn.innerHTML = '<i class="fa-solid fa-stop"></i> Stop Automated Trading';
+                    atBtn.className = "btn btn-danger";
+                    
+                    // Render logs
+                    const logsPanel = document.getElementById('autoTradeLogs');
+                    logsPanel.innerHTML = atData.log.map(l => `<div class="log-entry">${l}</div>`).join('');
+                    logsPanel.scrollTop = logsPanel.scrollHeight;
+                } else {
+                    atBadge.innerText = "Inactive";
+                    atBadge.style.background = 'rgba(239, 68, 68, 0.15)';
+                    atBadge.style.color = 'var(--accent-red)';
+                    atBadge.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+                    atBtn.innerHTML = '<i class="fa-solid fa-play"></i> Start Automated Trading';
+                    atBtn.className = "btn btn-success";
+                }
+            } catch (err) {
+                console.error("Health check error:", err);
+            }
+        }
+
+        async function syncAccountAndPositions() {
+            if (!isConnected) return;
+            
+            try {
+                // Fetch account
+                const accRes = await fetch('/api/v1/account');
+                const accData = await accRes.json();
+                if (accData.status === 'success') {
+                    const info = accData.data;
+                    document.getElementById('dispLogin').innerText = info.login;
+                    document.getElementById('dispServer').innerText = info.server;
+                    document.getElementById('dispLeverage').innerText = `1:${info.leverage}`;
+                    
+                    document.getElementById('accBalance').innerText = `$${info.balance.toFixed(2)}`;
+                    document.getElementById('accEquity').innerText = `$${info.equity.toFixed(2)}`;
+                    document.getElementById('accFreeMargin').innerText = `$${info.margin_free.toFixed(2)}`;
+                    document.getElementById('accProfit').innerText = `$${info.profit.toFixed(2)}`;
+                    document.getElementById('accMargin').innerText = `$${info.margin.toFixed(2)}`;
+                    
+                    // Style current profit
+                    const profDiv = document.getElementById('accProfit');
+                    if (info.profit > 0) {
+                        profDiv.className = "metric-value profit";
+                    } else if (info.profit < 0) {
+                        profDiv.className = "metric-value loss";
+                    } else {
+                        profDiv.className = "metric-value";
+                    }
+
+                    const level = info.margin > 0 ? (info.equity / info.margin * 100).toFixed(0) : 0;
+                    document.getElementById('accMarginLevel').innerText = `${level}%`;
+                }
+
+                // Fetch positions
+                const posRes = await fetch('/api/v1/positions');
+                const posData = await posRes.json();
+                const tbody = document.getElementById('positionsTable');
+                
+                if (posData.status === 'success' && posData.count > 0) {
+                    tbody.innerHTML = posData.data.map(p => {
+                        const isBuy = p.type === 0; // 0 = Buy, 1 = Sell in MT5 position struct
+                        const typeBadge = isBuy ? '<span class="badge badge-buy">BUY</span>' : '<span class="badge badge-sell">SELL</span>';
+                        return `
+                            <tr>
+                                <td>${p.ticket}</td>
+                                <td>${p.symbol}</td>
+                                <td>${typeBadge}</td>
+                                <td>${p.volume.toFixed(2)}</td>
+                                <td class="${p.profit >= 0 ? 'profit' : 'loss'}" style="font-weight:600; color:${p.profit >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'}">$${p.profit.toFixed(2)}</td>
+                                <td>
+                                    <button class="btn btn-secondary btn-danger" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; border:none;" onclick="closePosition(${p.ticket})">
+                                        Close
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-secondary);">No open positions found</td></tr>`;
+                }
+            } catch (err) {
+                console.error("Sync error:", err);
+            }
+        }
+
+        async function connectMT5() {
+            const login = parseInt(document.getElementById('login').value);
+            const password = document.getElementById('password').value;
+            const server = document.getElementById('server').value;
+            const path = document.getElementById('path').value;
+            
+            if (!login || !password || !server) {
+                alert("Please fill in login, password, and server.");
+                return;
+            }
+            
+            const btn = document.getElementById('btnConnect');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Connecting...';
+            btn.disabled = true;
+            
+            try {
+                const res = await fetch('/api/v1/connect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ login, password, server, path: path || null })
+                });
+                
+                const data = await res.json();
+                if (res.status === 200) {
+                    checkHealth();
+                    syncAccountAndPositions();
+                } else {
+                    alert(`Connection Failed: ${data.detail || 'Unknown error'}`);
+                }
+            } catch (err) {
+                alert(`Error: ${err.message}`);
+            } finally {
+                btn.innerHTML = '<i class="fa-solid fa-link"></i> Connect';
+                btn.disabled = false;
+            }
+        }
+
+        async function disconnectMT5() {
+            if (!confirm("Are you sure you want to disconnect?")) return;
+            try {
+                const res = await fetch('/api/v1/disconnect', { method: 'POST' });
+                if (res.status === 200) {
+                    checkHealth();
+                    document.getElementById('positionsTable').innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-secondary);">No open positions found or MT5 disconnected</td></tr>`;
+                }
+            } catch (err) {
+                alert(`Error: ${err.message}`);
+            }
+        }
+
+        async function closePosition(ticket) {
+            if (!confirm(`Close position ${ticket}?`)) return;
+            try {
+                const res = await fetch(`/api/v1/position/close/${ticket}`, { method: 'POST' });
+                const data = await res.json();
+                if (res.status === 200) {
+                    syncAccountAndPositions();
+                } else {
+                    alert(`Close failed: ${data.detail}`);
+                }
+            } catch (err) {
+                alert(`Error: ${err.message}`);
+            }
+        }
+
+        async function toggleAutoTrade() {
+            if (isAutoTrading) {
+                // Stop
+                try {
+                    const res = await fetch('/api/v1/autotrade/stop', { method: 'POST' });
+                    if (res.status === 200) {
+                        checkHealth();
+                    }
+                } catch (err) {
+                    alert(`Stop error: ${err.message}`);
+                }
+            } else {
+                // Start
+                if (!isConnected) {
+                    alert("Please connect to MetaTrader 5 first.");
+                    return;
+                }
+                
+                const symbol = document.getElementById('atSymbol').value;
+                const timeframe = document.getElementById('atTimeframe').value;
+                const strategy_name = document.getElementById('atStrategy').value;
+                const lot_size = parseFloat(document.getElementById('atLotSize').value);
+                const sl_pips = parseFloat(document.getElementById('atSL').value);
+                const tp_pips = parseFloat(document.getElementById('atTP').value);
+                
+                let strategy_params = {};
+                try {
+                    strategy_params = JSON.parse(document.getElementById('atParams').value);
+                } catch (e) {
+                    alert("Invalid JSON for Strategy Parameters.");
+                    return;
+                }
+                
+                try {
+                    const res = await fetch('/api/v1/autotrade/start', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            symbol,
+                            timeframe,
+                            strategy_name,
+                            strategy_params,
+                            lot_size,
+                            stop_loss_pips: sl_pips,
+                            take_profit_pips: tp_pips
+                        })
+                    });
+                    const data = await res.json();
+                    if (res.status === 200) {
+                        checkHealth();
+                    } else {
+                        alert(`Start failed: ${data.detail}`);
+                    }
+                } catch (err) {
+                    alert(`Error: ${err.message}`);
+                }
+            }
+        }
+
+        async function runBacktest() {
+            if (!isConnected) {
+                alert("Please connect to MetaTrader 5 first.");
+                return;
+            }
+            
+            const symbol = document.getElementById('btSymbol').value;
+            const timeframe = document.getElementById('btTimeframe').value;
+            const start_date = new Date(document.getElementById('btStartDate').value).toISOString();
+            const end_date = new Date(document.getElementById('btEndDate').value).toISOString();
+            const strategy_name = document.getElementById('btStrategy').value;
+            const lot_size = parseFloat(document.getElementById('btLotSize').value);
+            const sl_pips = parseFloat(document.getElementById('btSL').value);
+            const tp_pips = parseFloat(document.getElementById('btTP').value);
+            
+            let strategy_params = {};
+            try {
+                strategy_params = JSON.parse(document.getElementById('btParams').value);
+            } catch (e) {
+                alert("Invalid JSON for Strategy Parameters.");
+                return;
+            }
+            
+            const resultsDiv = document.getElementById('backtestResults');
+            resultsDiv.style.display = 'none';
+            
+            try {
+                const res = await fetch('/api/v1/backtest', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        symbol,
+                        timeframe,
+                        start_date,
+                        end_date,
+                        strategy_name,
+                        strategy_params,
+                        lot_size,
+                        stop_loss_pips: sl_pips,
+                        take_profit_pips: tp_pips
+                    })
+                });
+                
+                const data = await res.json();
+                if (res.status === 200) {
+                    resultsDiv.style.display = 'block';
+                    
+                    document.getElementById('resWinRate').innerText = `${data.win_rate.toFixed(1)}%`;
+                    
+                    const profitVal = data.final_balance - data.initial_balance;
+                    const profNode = document.getElementById('resProfit');
+                    profNode.innerText = `${profitVal >= 0 ? '+' : ''}$${profitVal.toFixed(2)}`;
+                    profNode.className = `metric-value ${profitVal >= 0 ? 'profit' : 'loss'}`;
+                    
+                    document.getElementById('resDrawdown').innerText = `${data.max_drawdown.toFixed(2)}%`;
+                    document.getElementById('resTotalTrades').innerText = data.total_trades;
+                    document.getElementById('resProfitFactor').innerText = data.profit_factor.toFixed(2);
+                    document.getElementById('resFinalBalance').innerText = `$${data.final_balance.toFixed(2)}`;
+                    
+                    renderEquityChart(data.timestamps, data.equity_curve);
+                } else {
+                    alert(`Simulation Error: ${data.detail}`);
+                }
+            } catch (err) {
+                alert(`Error running backtest: ${err.message}`);
+            }
+        }
+
+        async function runOptimize() {
+            if (!isConnected) {
+                alert("Please connect to MetaTrader 5 first.");
+                return;
+            }
+            
+            const symbol = document.getElementById('btSymbol').value;
+            const timeframe = document.getElementById('btTimeframe').value;
+            const start_date = new Date(document.getElementById('btStartDate').value).toISOString();
+            const end_date = new Date(document.getElementById('btEndDate').value).toISOString();
+            const strategy_name = document.getElementById('btStrategy').value;
+            const lot_size = parseFloat(document.getElementById('btLotSize').value);
+            const sl_pips = parseFloat(document.getElementById('btSL').value);
+            const tp_pips = parseFloat(document.getElementById('btTP').value);
+            
+            // Define standard parameters search range depending on selected strategy
+            let param_ranges = {};
+            if (strategy_name === 'rsi') {
+                param_ranges = {
+                    rsi_period: [10, 14, 20],
+                    oversold: [25, 30, 35],
+                    overbought: [65, 70, 75]
+                };
+            } else if (strategy_name === 'simple_ma_crossover') {
+                param_ranges = {
+                    fast_period: [5, 10, 15],
+                    slow_period: [20, 30, 40]
+                };
+            } else if (strategy_name === 'bollinger_bands') {
+                param_ranges = {
+                    period: [14, 20, 26],
+                    std_dev: [1.5, 2.0, 2.5]
+                };
+            } else if (strategy_name === 'macd') {
+                param_ranges = {
+                    fast: [8, 12, 16],
+                    slow: [22, 26, 30],
+                    signal: [7, 9, 11]
+                };
+            } else {
+                // Fallback range for custom parameters
+                param_ranges = {
+                    period: [10, 20, 30]
+                };
+            }
+            
+            if (!confirm(`Run parameters search on ${strategy_name}?\nRanges: ${JSON.stringify(param_ranges, null, 2)}`)) {
+                return;
+            }
+            
+            try {
+                const res = await fetch('/api/v1/optimize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        symbol,
+                        timeframe,
+                        start_date,
+                        end_date,
+                        strategy_name,
+                        param_ranges,
+                        lot_size,
+                        stop_loss_pips: sl_pips,
+                        take_profit_pips: tp_pips
+                    })
+                });
+                
+                const data = await res.json();
+                if (res.status === 200) {
+                    alert(`Optimization complete!\n\nBest parameters found:\n${JSON.stringify(data.best_params, null, 2)}\n\nExpected Profit: $${(data.best_result.final_balance - data.best_result.initial_balance).toFixed(2)}`);
+                    
+                    // Pre-fill parameters and results
+                    document.getElementById('btParams').value = JSON.stringify(data.best_params);
+                    
+                    const resultsDiv = document.getElementById('backtestResults');
+                    resultsDiv.style.display = 'block';
+                    document.getElementById('resWinRate').innerText = `${data.best_result.win_rate.toFixed(1)}%`;
+                    
+                    const profitVal = data.best_result.final_balance - data.best_result.initial_balance;
+                    const profNode = document.getElementById('resProfit');
+                    profNode.innerText = `${profitVal >= 0 ? '+' : ''}$${profitVal.toFixed(2)}`;
+                    profNode.className = `metric-value ${profitVal >= 0 ? 'profit' : 'loss'}`;
+                    
+                    document.getElementById('resDrawdown').innerText = `${data.best_result.max_drawdown.toFixed(2)}%`;
+                    document.getElementById('resTotalTrades').innerText = data.best_result.total_trades;
+                    document.getElementById('resProfitFactor').innerText = data.best_result.profit_factor.toFixed(2);
+                    document.getElementById('resFinalBalance').innerText = `$${data.best_result.final_balance.toFixed(2)}`;
+                    
+                    renderEquityChart(data.best_result.timestamps, data.best_result.equity_curve);
+                } else {
+                    alert(`Optimization Error: ${data.detail}`);
+                }
+            } catch (err) {
+                alert(`Error running optimization: ${err.message}`);
+            }
+        }
+
+        function renderEquityChart(labels, dataPoints) {
+            if (equityChart) {
+                equityChart.destroy();
+            }
+            
+            // Format labels for presentation
+            const formattedLabels = labels.map(l => {
+                const d = new Date(l);
+                return isNaN(d.getTime()) ? l : d.toLocaleDateString();
+            });
+
+            const ctx = document.getElementById('equityChart').getContext('2d');
+            equityChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: formattedLabels,
+                    datasets: [{
+                        label: 'Account Equity ($)',
+                        data: dataPoints,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                        borderWidth: 2,
+                        tension: 0.15,
+                        fill: true,
+                        pointRadius: formattedLabels.length > 100 ? 0 : 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255, 255, 255, 0.03)' },
+                            ticks: { color: '#9ca3af', maxTicksLimit: 8 }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255, 255, 255, 0.03)' },
+                            ticks: { color: '#9ca3af' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -30,6 +30,13 @@
 
 ## ✨ Features
 
+### 🌟 Brand New Features!
+- 🎨 **Interactive Web UI Dashboard** - Serve a beautiful, responsive dark-mode glassmorphism dashboard at `/` to connect to MT5, monitor account health, manage open trades, run backtests, and stream logs.
+- 🤖 **Automated Trading Engine** - Enable background auto-trading on any strategy (RSI, Bollinger Bands, Breakouts, etc.) with automatic exits on opposite signals.
+- 🧪 **Advanced Strategy Backtester** - Run simulations for all 10+ advanced strategy templates with realistic SL/TP checks on intraday price swings.
+- 🪄 **Hyper-Parameter Auto-Optimization** - Run parameter search grids over historical data to find the highest-performing inputs for any strategy via the API.
+- 🚀 **Modern Pydantic v2 & FastAPI Lifespan** - Clean, fast, future-proof schemas and startup/shutdown lifecycle controls.
+
 ### Core Capabilities
 - ✅ **Full MT5 Integration** - Connect to any MetaTrader 5 broker
 - ✅ **RESTful API** - Easy integration with any programming language
