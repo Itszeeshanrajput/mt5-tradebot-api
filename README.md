@@ -9,6 +9,8 @@
 
 > A powerful, easy-to-use API for testing trading strategies, backtesting Expert Advisors, and automating forex trading operations via MetaTrader 5.
 
+![MT5 TradeBot API Web UI Dashboard](assets/dashboard.png)
+
 ---
 
 ## 📋 Table of Contents
